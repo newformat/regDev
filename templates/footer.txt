@@ -1,0 +1,11 @@
+run_time = TIME('E')
+pause_time = 5400
+if run_time < pause_time then
+pause_time = (pause_time - run_time)/60
+do i = 1 to pause_time
+tab_time = pause_time-i
+CALL ZocSessionTab "SETNAME", -1, "regDev: timer["tab_time%1" min.]"
+delay 60
+end
+CALL ZocSessionTab "SETNAME", -1, "regDev: Finished"
+CALL ZocSessionTab "SETBLINKING", -1, 1

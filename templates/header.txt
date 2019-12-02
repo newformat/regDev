@@ -1,0 +1,3 @@
+CALL ZocSessionTab "SETNAME", -1, "regDev: ["TIME('N')"]";
+CALL TIME('E')
+/********/
