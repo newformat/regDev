@@ -166,6 +166,6 @@ class DataAnalysis:
         css_font = "<span style=\"font-size:17px; font-family:Verdana\">-&emsp;"
         with open(self.statics_unreg_file, 'a') as statics:
             statics.write(
-                css_font  + self.f_str_date + "&emsp;   " + self.f_str_time + "&emsp;   " + str(
+                css_font + self.f_str_date + "&emsp;   " + self.f_str_time + "&emsp;   " + str(
                     self.count_devices) + "</span><br />\n")  # count_devices в DataWriteForLists
             statics.close()
