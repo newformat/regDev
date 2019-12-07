@@ -74,7 +74,7 @@ class DataWriteForLists:
         input('Нажмите enter чтобы закрыть программу')
         return -1
 
-
+# код не рабочий т.к. ведется работа над классом DataWriteForFile и DataAnalysis
 class DataWriteForFile:
     ''' запись данных в файл .zrx '''
 
