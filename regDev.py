@@ -6,7 +6,7 @@
 
 '''
 создана ветка по работе с классом DataWriteForFile  - class_data_file
-создана ветка по работе с классом DataAnalysis      - class_data_analysis
+создана ветка по работе с классом DataAnalysis      - class_data_analysis - изменение тест
 '''
 
 import csv
