@@ -4,6 +4,10 @@
 Берет список скрипта с regDevice и список leaveTimeSet. После формирует в файле поочередно.
 '''
 
+'''
+создана ветка по работе с классом DataWriteForFile - class_data_file
+'''
+
 import csv
 import os
 import getpass
