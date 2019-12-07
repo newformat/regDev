@@ -28,13 +28,13 @@ class SearchCSVFile:
 
         if not len(list_paths):
             self.print_not_file()
-            input('Нажмите enter чтобы продолжить')
             return -1
         else:
             return max(list_paths, key=os.path.getctime)
 
     def print_not_file(self):
         print("файла с названием " + self.tepl_name + " не найден")
+        input('Нажмите enter чтобы продолжить')
 
 
 class DataWriteForLists:
@@ -63,8 +63,7 @@ class DataWriteForLists:
                 self.add_reg_devices(csv.reader(csv_file))  # RegDev
                 self.add_leave_time_set()  # LeaveTime
         except FileNotFoundError:
-            print('неверный путь к файлу')
-            # input('Нажмите enter чтобы закрыть программу')
+            self.print_file_not_found()
             return -1
 
     def add_reg_devices(self, reader):
@@ -79,6 +78,10 @@ class DataWriteForLists:
             self.list_leaveTimeSet.append(
                 "CALL ZocSend \"zb.sysopt.leaveTimeSet " + listMAC[54:70] + " " + str(self.leaveTime) + "\"" + str(
                     self.template_new))
+
+    def print_file_not_found(self):
+        print('неверный путь к файлу')
+        input('Нажмите enter чтобы закрыть программу')
 
 
 class DataWriteForFile:
@@ -121,11 +124,9 @@ class DataWriteForFile:
 
         except FileNotFoundError:
             self.print_file_not_found_error()
-            # input('Нажмите enter чтобы закрыть программу')
             return -1
         except  PermissionError:
             self.print_permission_error()
-            # input('Нажмите enter чтобы закрыть программу')
             return -1
 
     def print_file_not_found_error(self):
@@ -136,6 +137,7 @@ class DataWriteForFile:
 
 
 class DataAnalysis:
+    ''' сбор данных статистики по незарегестрированным устройствам '''
     def __init__(self, path_file_csv, statics_unreg_file, count_devices):
         ''' Дата и время создания файла (коректный формат) '''
         self.stat = os.stat(path_file_csv)  # path_file_csv в DataWriteForLists
