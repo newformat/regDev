@@ -12,11 +12,14 @@ import time
 from datetime import datetime
 
 
-# поиск файла
+
 class SearchCSVFile:
+
     def __init__(self, search_path, tepl_name):
         self.search_path = search_path  # путь к папке, где хранится csv файл.
         self.tepl_name = tepl_name  # шаблон названия файла
+
+    # TODO: == реализовать отдельный метод провеки пути к файлу здесь ==
 
     def search_new_file(self):
         ''' находит самый "свежий" файл в каталоге и возвращет его полный путь. '''
@@ -28,13 +31,13 @@ class SearchCSVFile:
 
         if not len(list_paths):
             self.print_not_file()
+            input('Нажмите enter чтобы продолжить')
             return -1
         else:
             return max(list_paths, key=os.path.getctime)
 
     def print_not_file(self):
         print("файла с названием " + self.tepl_name + " не найден")
-        input('Нажмите enter чтобы продолжить')
 
 
 class DataWriteForLists:
@@ -45,43 +48,31 @@ class DataWriteForLists:
           29.11.19 - дополнение к идеи, формировать список структурно - 1 сеть - его мак адреса, другая сеть - другие мак адреса
     '''
 
-    def __init__(self, search_new_file, start_zoc_template, zoc_timeout_param, end_zoc_template):
-        self.ZocTimeout = zoc_timeout_param  # время ожидания отработки комманды
-        self.leaveTime = 250  # ...leaveTimeSet MAC leaveTime
-        self.BigleaveTime = 720  # для больших проектов
-        self.count_devices = 0  # кол-во адресов
+    def __init__(self, search_new_file):
         self.path_file_csv = search_new_file  # путь к новому csv файлу для работы / search_new_file находится в классе SearchCSVFile
-        self.template_new = start_zoc_template + str(self.ZocTimeout) + end_zoc_template  # шаблон для rexx скрипта
         self.list_regDevice = list()
-        self.list_leaveTimeSet = list()
+
 
     def chech_path_file(self):
         ''' проверка пути файла '''
         try:
-            # print("Файл для обработки:\n" + self.path_file_csv + "\nвремя создания " + str( time.ctime(os.path.getctime(self.path_file_csv))) + "\n")
             with open(self.path_file_csv, 'r', newline='') as csv_file:
-                self.add_reg_devices(csv.reader(csv_file))  # RegDev
-                self.add_leave_time_set()  # LeaveTime
+                self.add_reg_devices(csv.reader(csv_file))  # RegDev список
         except FileNotFoundError:
             self.print_file_not_found()
             return -1
 
+
     def add_reg_devices(self, reader):
         ''' RegDev - список '''
         for listReg in reader:
-            self.list_regDevice.append(listReg[0].split(';')[0] + self.template_new)
-            self.count_devices += 1
+            self.list_regDevice.append(listReg[0].split(';')[0])
 
-    def add_leave_time_set(self):
-        ''' LeaveTimeSet - список '''
-        for listMAC in self.list_regDevice:
-            self.list_leaveTimeSet.append(
-                "CALL ZocSend \"zb.sysopt.leaveTimeSet " + listMAC[54:70] + " " + str(self.leaveTime) + "\"" + str(
-                    self.template_new))
 
     def print_file_not_found(self):
-        print('неверный путь к файлу')
+        print('Поиск *.csv файла - неверный путь к файлу')
         input('Нажмите enter чтобы закрыть программу')
+        return -1
 
 
 class DataWriteForFile:
