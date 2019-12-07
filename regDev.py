@@ -12,11 +12,14 @@ import time
 from datetime import datetime
 
 
-# поиск файла
+
 class SearchCSVFile:
+
     def __init__(self, search_path, tepl_name):
         self.search_path = search_path  # путь к папке, где хранится csv файл.
         self.tepl_name = tepl_name  # шаблон названия файла
+
+    # TODO: == реализовать отдельный метод провеки пути к файлу здесь ==
 
     def search_new_file(self):
         ''' находит самый "свежий" файл в каталоге и возвращет его полный путь. '''
@@ -28,13 +31,13 @@ class SearchCSVFile:
 
         if not len(list_paths):
             self.print_not_file()
+            input('Нажмите enter чтобы продолжить')
             return -1
         else:
             return max(list_paths, key=os.path.getctime)
 
     def print_not_file(self):
         print("файла с названием " + self.tepl_name + " не найден")
-        input('Нажмите enter чтобы продолжить')
 
 
 class DataWriteForLists:
