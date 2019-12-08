@@ -78,33 +78,71 @@ class DataWriteForLists:
         input('Нажмите enter чтобы закрыть программу')
         return -1
 
-# код не рабочий т.к. ведется работа над классом DataWriteForFile и DataAnalysis
+
 class DataWriteForFile:
     ''' запись данных в файл .zrx '''
+    def __init__(self, list_unregDevice):
+        # TODO: Все параметры для шаблона скрипта rexx можно вынести в конфиг.json формате или разнести по файлам
+        self.list_unregDevice = list_unregDevice  # список шаблонов с адресами под регистрацию
+        self.list_reg_dev = list()
+        self.list_leave_dev = list()
+        self.save_file = '' # путь для сохранения файла rzx
 
-    def __init__(self, save_file, name_file_zrx, timer, list_regDevice, list_leaveTimeSet):
-        self.save_file = save_file + name_file_zrx  # путь сохранения файла + имя_файла.zrx
-        self.Timer = timer  # таймер скрипта для уведомления, что пора обновлять скрипт
-        self.list_regDevice = list_regDevice  # список шаблонов с адресами под регистрацию
-        self.list_leaveTimeSet = list_leaveTimeSet  # список шаблонов с адресами под время в сети
+
+    def formation_template_reg_dev(self):
+        ''' формирование шаблона под команду registryDevices
+        TODO в перспективах - разделить запись данных - шаблон(начало файла) : список адресов : шаблон(конец файла)
+        '''
+        zoc_line = ";CALL ZocSend \"^M\";Call ZocTimeout 8;CALL Zocwait \">\";CALL ZocSend \"^C\";delay 1;"
+        for reg_dev in self.list_unregDevice:
+            self.list_reg_dev.append(reg_dev + zoc_line)
+
+
+    def formation_template_leave_dev(self):
+        """ формирование шаблона под команду leaveSetTime
+        TODO: Сформировать список сетей в отдельном файле, для которых устриойства должны быть в сети 720 мин. вместо 250
+            Координаты шаблона строки для вырезки адреса сети - [37:53]
+        """
+        zoc_leave_command = "CALL ZocSend \"zb.sysopt.leaveTimeSet "
+        zoc_leave_time = 250
+        zoc_line = "\";CALL ZocSend \"^M\";Call ZocTimeout 8;CALL Zocwait \">\";CALL ZocSend \"^C\";delay 1;"
+        for leave_dev in self.list_unregDevice:
+            self.list_leave_dev.append( zoc_leave_command + leave_dev[54:70] + str(zoc_leave_time) +  zoc_line)
+
+
+    def get_path(self, save_path, name_file_zrx ):
+        """ Получить путь для сохранения файла
+        :param save_path - путь к папке
+        :param name_file_zrx - название файла
+        """
+        if os.path.exists(save_path):
+            self.save_file = save_path + name_file_zrx  # путь сохранения файла + имя_файла.zrx
+        else:
+            self.print_folder_not_found()
+            return -1
+
 
     def file_write(self):
+        ''' запись шаблона в файл '''
         try:
-            # TODO в перспективах - разделить запись данных - шаблон(начало файла) : список адресов : шаблон(конец файла)
+
             with open(self.save_file, 'w') as result:
                 ''' шапка скрипта '''
                 result.write("""CALL ZocSessionTab "SETNAME", -1, "regDev: ["TIME('N')"]";
-        CALL TIME('E')
-        /********/
+CALL TIME('E')
+/********/
 """)
-                ''' сам скрипт RegDev + LeaveTimeSet '''
-                for count in range(0, len(self.list_regDevice) - 1):  # list_regDevice из класса DataWriteForLists
-                    result.write(self.list_regDevice[
-                                     count] + '\n')  # + list_leaveTimeSet[count] + '\n' (ПОТОМ ВЕРНУТЬ!!!) # list_leaveTimeSet из класса DataWriteForLists)
+
+                # Запись данных в файл скрита .zrx
+                # TODO:
+                #   приделать к скрипту self.list_leave_dev[count] + '\n' когда настроим адреса
+                #   cетей в методе formation_template_leave_dev()
+                for count in range(0, len(self.list_reg_dev) - 1):
+                    result.write(self.list_reg_dev[count] + '\n')
 
                 # === конец файла, после списка ===
                 result.write("run_time = TIME('E')\n")
-                result.write("pause_time = " + str(self.Timer) + "\n")
+                result.write("pause_time = 5400\n")
                 result.write("if run_time < pause_time then\n")
                 result.write("pause_time = (pause_time - run_time)/60\n")
                 result.write("do i = 1 to pause_time\n")
@@ -126,9 +164,15 @@ class DataWriteForFile:
 
     def print_file_not_found_error(self):
         print('неверно указан путь к папке')
+        input('Нажмите enter чтобы закрыть программу')
 
     def print_permission_error(self):
         print('недостаточно прав для создания файла')
+        input('Нажмите enter чтобы закрыть программу')
+
+    def print_folder_not_found(self):
+        print('такой папки нет')
+        input('Нажмите enter чтобы закрыть программу')
 
 
 class DataAnalysis:
