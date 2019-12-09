@@ -169,14 +169,13 @@ class DataWriteForFile:
 
 
 class DataAnalysis:
-    ''' сбор данных статистики по незарегестрированным устройствам '''
-    def __init__(self, path_file_csv, statics_unreg_file, count_devices):
+    def __init__(self, path_file_csv, list_unregDevice):
         ''' Дата и время создания файла (коректный формат) '''
-        self.stat = os.stat(path_file_csv)  # path_file_csv в DataWriteForLists
+        self.stat = os.stat(path_file_csv)  # путь к файлу (для даты)
         self.f_str_date = str(datetime.fromtimestamp(self.stat.st_atime).date())
         self.f_str_time = str(datetime.fromtimestamp(self.stat.st_atime).time()).split(".")[0]
-        self.statics_unreg_file = statics_unreg_file  # r".\monitoring\staticUnregDev.htm"  # путь к статистике файла
-        self.count_devices = count_devices  # кол-во МАС адресов из списка
+        self.statics_unreg_file = r".\monitoring\staticUnregDev.htm"  # путь к статистике файла
+        self.count_devices = str(len(list_unregDevice))  # кол-во МАС адресов из списка
 
     def file_write_statics(self):
         ''' запись статистики по файлу '''
