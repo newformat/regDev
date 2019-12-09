@@ -118,17 +118,22 @@ class DataWriteForFile:
             self.print_folder_not_found()
             return -1
 
+    def get_template(self, path_template ):
+        if (os.path.exists(path_template)):
+            with open(path_template, 'r') as template:
+                return template.read()
+
 
     def file_write(self):
         ''' запись шаблона в файл '''
+        template_head = ".\\templates\\header.txt"
+        template_footer = ".\\templates\\footer.txt"
+
         try:
 
             with open(self.save_file, 'w') as result:
                 ''' шапка скрипта '''
-                result.write("""CALL ZocSessionTab "SETNAME", -1, "regDev: ["TIME('N')"]";
-CALL TIME('E')
-/********/
-""")
+                result.write(self.get_template(template_head))
 
                 # Запись данных в файл скрита .zrx
                 # TODO:
@@ -137,20 +142,8 @@ CALL TIME('E')
                 for count in range(0, len(self.list_reg_dev) - 1):
                     result.write(self.list_reg_dev[count] + '\n')
 
-                # === конец файла, после списка ===
-                result.write("run_time = TIME('E')\n")
-                result.write("pause_time = 5400\n")
-                result.write("if run_time < pause_time then\n")
-                result.write("pause_time = (pause_time - run_time)/60\n")
-                result.write("do i = 1 to pause_time\n")
-                result.write("tab_time = pause_time-i\n")
-                result.write("CALL ZocSessionTab \"SETNAME\", -1, \"regDev: timer[\"tab_time%1\" min.]\"\n")
-                result.write("delay 60\n")
-                result.write("end\n")
-                result.write("CALL ZocSessionTab \"SETNAME\", -1, \"regDev: Finished\"\n")
-                result.write("CALL ZocSessionTab \"SETBLINKING\", -1, 1")
+                result.write(self.get_template(template_footer))
                 result.close()
-                # ======== конец файла, конец записи ========
 
         except FileNotFoundError:
             self.print_file_not_found_error()
