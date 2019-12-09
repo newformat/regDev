@@ -96,15 +96,23 @@ class DataWriteForFile:
 
 
     def formation_template_leave_dev(self):
-        """ формирование шаблона под команду leaveSetTime
-        TODO: Сформировать список сетей в отдельном файле, для которых устриойства должны быть в сети 720 мин. вместо 250
-            Координаты шаблона строки для вырезки адреса сети - [37:53]
-        """
+        """ формирование шаблона под команду leaveSetTime """
         zoc_leave_command = "CALL ZocSend \"zb.sysopt.leaveTimeSet "
-        zoc_leave_time = 250
+        zoc_leave_time = " 250"
+        zoc_leave_time_big = " 720"
         zoc_line = "\";CALL ZocSend \"^M\";Call ZocTimeout 8;CALL Zocwait \">\";CALL ZocSend \"^C\";delay 1;"
+        mac_networks = ".\\data\\mac_net_big_project.txt"
+        mac_list = list()
+
+        with open(mac_networks, "r") as mac_addr:
+            for mac in mac_addr:
+                mac_list.append(mac.split('\n')[0])
+
         for leave_dev in self.list_unregDevice:
-            self.list_leave_dev.append( zoc_leave_command + leave_dev[54:70] + str(zoc_leave_time) +  zoc_line)
+            if leave_dev[37:53] in mac_list:
+                self.list_leave_dev.append(zoc_leave_command + leave_dev[54:70] + zoc_leave_time_big + zoc_line)
+                continue
+            self.list_leave_dev.append( zoc_leave_command + leave_dev[54:70] + zoc_leave_time +  zoc_line)
 
 
     def get_path(self, save_path, name_file_zrx ):
