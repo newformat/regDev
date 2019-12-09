@@ -79,7 +79,6 @@ class DataWriteForLists:
 class DataWriteForFile:
     ''' запись данных в файл .zrx '''
     def __init__(self, list_unregDevice):
-        # TODO: Все параметры для шаблона скрипта rexx можно вынести в конфиг.json формате или разнести по файлам
         self.list_unregDevice = list_unregDevice  # список шаблонов с адресами под регистрацию
         self.list_reg_dev = list()
         self.list_leave_dev = list()
@@ -87,9 +86,7 @@ class DataWriteForFile:
 
 
     def formation_template_reg_dev(self):
-        ''' формирование шаблона под команду registryDevices
-        TODO в перспективах - разделить запись данных - шаблон(начало файла) : список адресов : шаблон(конец файла)
-        '''
+        ''' формирование шаблона под команду registryDevices '''
         zoc_line = ";CALL ZocSend \"^M\";Call ZocTimeout 8;CALL Zocwait \">\";CALL ZocSend \"^C\";delay 1;"
         for reg_dev in self.list_unregDevice:
             self.list_reg_dev.append(reg_dev + zoc_line)
@@ -126,6 +123,7 @@ class DataWriteForFile:
             self.print_folder_not_found()
             return -1
 
+
     def get_template(self, path_template ):
         if (os.path.exists(path_template)):
             with open(path_template, 'r') as template:
@@ -143,12 +141,9 @@ class DataWriteForFile:
                 ''' шапка скрипта '''
                 result.write(self.get_template(template_head))
 
-                # Запись данных в файл скрита .zrx
-                # TODO:
-                #   приделать к скрипту self.list_leave_dev[count] + '\n' когда настроим адреса
-                #   cетей в методе formation_template_leave_dev()
                 for count in range(0, len(self.list_reg_dev) - 1):
                     result.write(self.list_reg_dev[count] + '\n')
+                    result.write(self.list_leave_dev[count] + '\n')
 
                 result.write(self.get_template(template_footer))
                 result.close()
