@@ -50,7 +50,7 @@ class DataWriteForLists:
     '''
 
     def __init__(self, search_new_file):
-        self.path_file_csv = search_new_file  # путь к новому csv файлу для работы / search_new_file находится в классе SearchCSVFile
+        self.path_file_csv = search_new_file  # путь к новому csv файлу для работы
         self.list_regDevice = list()
 
 
@@ -79,7 +79,7 @@ class DataWriteForLists:
 class DataWriteForFile:
     ''' запись данных в файл .zrx '''
     def __init__(self, list_unregDevice):
-        self.list_unregDevice = list_unregDevice  # список шаблонов с адресами под регистрацию
+        self.list_unregDevice = list_unregDevice
         self.list_reg_dev = list()
         self.list_leave_dev = list()
         self.save_file = '' # путь для сохранения файла rzx
@@ -118,7 +118,7 @@ class DataWriteForFile:
         :param name_file_zrx - название файла
         """
         if os.path.exists(save_path):
-            self.save_file = save_path + name_file_zrx  # путь сохранения файла + имя_файла.zrx
+            self.save_file = save_path + name_file_zrx
         else:
             self.print_folder_not_found()
             return -1
@@ -172,10 +172,12 @@ class DataAnalysis:
     def __init__(self, path_file_csv, list_unregDevice):
         ''' Дата и время создания файла (коректный формат) '''
         self.stat = os.stat(path_file_csv)  # путь к файлу (для даты)
-        self.f_str_date = str(datetime.fromtimestamp(self.stat.st_atime).date())
-        self.f_str_time = str(datetime.fromtimestamp(self.stat.st_atime).time()).split(".")[0]
+        self.f_str_date = str(datetime.fromtimestamp(self.stat.st_atime).date()) # "Дата"
+        self.f_str_time = str(datetime.fromtimestamp(self.stat.st_atime).time()).split(".")[0] # "Время"
         self.statics_unreg_file = r".\monitoring\staticUnregDev.htm"  # путь к статистике файла
         self.count_devices = str(len(list_unregDevice))  # кол-во МАС адресов из списка
+
+    
 
     def file_write_statics(self):
         ''' запись статистики по файлу '''
@@ -183,5 +185,5 @@ class DataAnalysis:
         with open(self.statics_unreg_file, 'a') as statics:
             statics.write(
                 css_font + self.f_str_date + "&emsp;   " + self.f_str_time + "&emsp;   " + str(
-                    self.count_devices) + "</span><br />\n")  # count_devices в DataWriteForLists
+                    self.count_devices) + "</span><br />\n")
             statics.close()
