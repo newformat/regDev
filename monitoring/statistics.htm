@@ -1,42 +1,35 @@
 <!--
-РЎС‚Р°С‚РёСЃС‚РёРєР° Р·Р° С‚РµРєСѓС‰РёР№ РјРµСЃСЏС†.
-РџРѕ РѕРєРѕРЅС‡Р°РЅРёСЋ РјРµСЃСЏС†Р° Рё РЅР°С‡Р°Р»Рѕ РЅРѕРІРѕРіРѕ - С„Р°Р№Р» Р·Р°РІРµСЂС€Р°РµС‚СЃСЏ Рё РїРµСЂРµРёРјРµРЅРѕРІС‹РІР°РµС‚СЃСЏ, Р·Р° РЅРёРј "СЃР·РґР°РµС‚СЃСЏ" СЌС‚РѕС‚ Р¶Рµ, РЅРѕРІС‹Р№ РјРµСЃСЏС†.
-РїСЂРёРјРµСЂ: end_statistics_12_2019.htm
-# РёРґРµСЏ: РґР»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ РѕРїСЂРµРґРµР»РёС‚СЊ, РЅР°СЃС‚Р°Р» Р»Рё РЅРѕРІС‹Р№ РјРµСЃСЏС† - СЃС‚РѕРёС‚ РїСЂРѕРІРµСЂРёС‚СЊ РґР°С‚Сѓ РїРѕСЃР»РµРґРЅРµРіРѕ РёР·РјРµРЅРµРЅРёСЏ С„Р°Р№Р»Р° СЃ С‚РµРєСѓС‰РµР№
+Статистика за текущий месяц.
+По окончанию месяца и начало нового - файл завершается и переименовывается, за ним "сздается" этот же, новый месяц.
+пример: end_statistics_12_2019.htm
+# идея: для того, чтобы определить, настал ли новый месяц - стоит проверить дату последнего изменения файла с текущей
 -->
 <!DOCTYPE html>
+<html>
 <head>
-<title>РќРµР·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹Рµ РџРЈ - Р”РµРєР°Р±СЂСЊ 2019</title><style type="text/css">
+<title>Незарегистрированные ПУ - Декабрь 2019</title><style type="text/css">
 .cwdtable {font-family:Helvetica;font-size:12px;color:#333333;width:100%;border-width: 1px;border-color: #ebab3a;border-collapse: collapse;}
 .cwdtable th {font-size:17px;background:#ffad4b;border-width: 1px;padding: 8px;border-style: solid;border-color: #ebab3a;}
 .cwdtable tr {background:#ffffff;}
-.cwdtable td {font-family:Verdana;font-size:15px;border-width: 1px;padding: 8px;border-style: solid;border-color: #ebab3a;}
-.mobileTable {overflow:auto;width:550px}
+.cwdtable td {font-family:Verdana;font-size:15px;border-width: 1px;padding: 3px;border-style: solid;border-color: #ebab3a;}
+.mobileTable {overflow:auto;width:530px}
 .cwdtable th,.cwdtable td{text-align:center}
 .cwdtable tr:hover {background:#fff8ea;}
 </style>
 </head>
 <body>
-<p style="font-family: Tahoma; font-size:20px">РЎС‚Р°С‚РёСЃС‚РёРєР° РЅРµР·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹С… РџРЈ РЅР° РґРµРєР°Р±СЂСЊ 2019</p>
+<p style="font-family: Tahoma; font-size:20px">Статистика незарегистрированных ПУ на декабрь 2019</p>
 <div class="mobileTable">
 <table class="cwdtable" cellspacing="0" cellpadding="1" border="1">
 <thead>
 	<tr>
-		<th>РґР°С‚Р°</th>
-		<th>РІСЂРµРјСЏ</th>
-		<th>Рє-РІРѕ СЃРµС‚РµР№</th>
-		<th>Рє-РІРѕ РџРЈ</th>
-		<th>РёРЅС„Рѕ</th>
+		<th>дата</th>
+		<th>время</th>
+		<th>к-во сетей</th>
+		<th>к-во ПУ</th>
+		<th>инфо</th>
 	</tr>
 </thead>
 <tbody>
-	<tr>
-		<td>10.12.2019</td>
-		<td>15:40:43</td>
-		<td>20</td>
-		<td>190</td>
-		<td><a href=".\day_statics\С‡Р°СЃ_РјРёРЅСѓС‚Р°_СЃРµРєСѓРЅРґР°.htm">link</a></td>
-	</tr>
-</tbody>
-</table>
-</div>
+<tr><td>2019-12-16</td><td>00:53:08</td><td>17</td><td>46</td><td><td><a href="#">link</a></td>
+<tr><td>2019-12-16</td><td>00:54:22</td><td>17</td><td>46</td><td><a href="#">link</a></td></tr>
