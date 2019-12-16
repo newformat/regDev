@@ -169,21 +169,63 @@ class DataWriteForFile:
 
 
 class DataAnalysis:
+    # TODO: идея: для того, чтобы определить, настал ли новый месяц - стоит проверить дату последнего изменения файла с текущей
+    #   Это нужно для создания нового файла когда настанет новый месяц для записи отчетов
     def __init__(self, path_file_csv, list_unregDevice):
         ''' Дата и время создания файла (коректный формат) '''
         self.stat = os.stat(path_file_csv)  # путь к файлу (для даты)
-        self.f_str_date = str(datetime.fromtimestamp(self.stat.st_atime).date()) # "Дата"
-        self.f_str_time = str(datetime.fromtimestamp(self.stat.st_atime).time()).split(".")[0] # "Время"
-        self.statics_unreg_file = r".\monitoring\staticUnregDev.htm"  # путь к статистике файла
+        self.statics_unreg_file = r".\monitoring\statistics.htm"  # путь к статистике файла
+        self.f_str_date = str(datetime.fromtimestamp(self.stat.st_atime).date())
+        self.f_str_time = str(datetime.fromtimestamp(self.stat.st_atime).time()).split(".")[0]
+        self.list_unregDevice = list_unregDevice
         self.count_devices = str(len(list_unregDevice))  # кол-во МАС адресов из списка
+        self.networks = list() # кол-во МАС адресов сетей и значения
+        self.network_devices = dict() # словарь, 'сеть' : [..устройства..]
 
-    
+    # кол-во сетей на незарегистрированные ПУ
+    def get_networks_count(self):
+        for network in self.list_unregDevice:
+            if network[37:53] not in self.networks:
+                self.networks.append(network[37:53])
+
+    #  кол-во устройств на каждую сеть
+    def get_network_devices(self):
+        '''
+        self.networks - cписок сетей
+        self.list_unregDevice - список из *.csv файла
+        self.network_devices -  словарь, формат ( сеть - [..устройства этой сети..] )
+        temp - список для сохранения устройств одной сети
+        :return:
+        '''
+        for network in self.networks:
+            temp = list()
+            for network_2 in self.list_unregDevice:
+                if network == network_2[37:53]:
+                    temp.append(network_2[54:70])
+            self.network_devices.update({network : temp})
+
+    def get_template(self, path_template ):
+        if (os.path.exists(path_template)):
+            with open(path_template, 'r') as template:
+                return template.read()
+
+    def file_write_detail_statics(self):
+        '''
+        Подробная статистика по спику файла *.csv
+        1. Создать шаблон страницы
+        2. Собрать данные для записи
+        3. Записать данные в шаблон страницы
+        4. Сохранить шаблон с данными в файл в папку detail_stat
+        :return:
+        '''
+
 
     def file_write_statics(self):
-        ''' запись статистики по файлу '''
-        css_font = "<span style=\"font-size:17px; font-family:Verdana\">-&emsp;"
+        ''' запись статистики в файл '''
         with open(self.statics_unreg_file, 'a') as statics:
-            statics.write(
-                css_font + self.f_str_date + "&emsp;   " + self.f_str_time + "&emsp;   " + str(
-                    self.count_devices) + "</span><br />\n")
+            statics.write("\n<tr><td>{0}</td>".format( self.f_str_date))
+            statics.write("<td>{0}</td>".format( self.f_str_time))
+            statics.write("<td>{0}</td>".format( str(len(self.networks))))
+            statics.write("<td>{0}</td>".format( self.count_devices))
+            statics.write("<td><a href=\"#\">link</a></td></tr>")
             statics.close()
