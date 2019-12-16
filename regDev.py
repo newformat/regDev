@@ -11,8 +11,7 @@ import getpass
 import re
 import time
 from datetime import datetime
-
-
+import shutil
 
 class SearchCSVFile:
 
@@ -171,6 +170,8 @@ class DataWriteForFile:
 class DataAnalysis:
     # TODO: идея: для того, чтобы определить, настал ли новый месяц - стоит проверить дату последнего изменения файла с текущей
     #   Это нужно для создания нового файла когда настанет новый месяц для записи отчетов
+    #
+    # TODO: дополнить пробелом в таблице между днями в полях для удобства
     def __init__(self, path_file_csv, list_unregDevice):
         ''' Дата и время создания файла (коректный формат) '''
         self.stat = os.stat(path_file_csv)  # путь к файлу (для даты)
@@ -204,10 +205,16 @@ class DataAnalysis:
                     temp.append(network_2[54:70])
             self.network_devices.update({network : temp})
 
+
     def get_template(self, path_template ):
         if (os.path.exists(path_template)):
             with open(path_template, 'r') as template:
                 return template.read()
+
+    def get_data_file(self, path_file):
+        ''' возвращает дату последнего изменения '''
+        return str(datetime.fromtimestamp(os.stat(path_file).st_mtime).date())
+
 
     def file_write_detail_statics(self):
         '''
@@ -219,9 +226,28 @@ class DataAnalysis:
         :return:
         '''
 
-
+    # ВНИМАНИЕ! ДАННЫЙ МЕТОД НУЖНО БУДЕТ РАЗДЕЛИТЬ НА ДРУГИЕ МЕТОДЫ
     def file_write_statics(self):
-        ''' запись статистики в файл '''
+        ''' запись статистики в файл [5:7] '''
+        # если месяц не текущий - архивируем старый файл прошлого месяца в ./history и создаем новый
+        if str(datetime.today().date())[5:7] != self.get_data_file(self.statics_unreg_file)[5:7]:
+            head_htm = self.get_template(".\\templates\\html\\head_statics.txt")
+            footer_htm = self.get_template(".\\templates\\html\\footer_statics.txt")
+
+            # записать футер в файле
+            with open(self.statics_unreg_file, 'a') as write_footer:
+                write_footer.write(footer_htm)
+                write_footer.close()
+
+            # копирование файла в папку history в формате "дата.htm" (убрать число из даты т.к. функция get_data_file возвращает дату последнего изменения)
+            shutil.move(self.statics_unreg_file, ".\\monitoring\\history\\{0}.htm".format('x.' + self.get_data_file(self.statics_unreg_file)[5:7] + '.' + self.get_data_file(self.statics_unreg_file)[:4]))
+
+            # создание нового файла и запись шапки
+            with open(self.statics_unreg_file, 'w') as write_header:
+                write_header.write(head_htm.replace('{MONTH}','00').replace('{YEAR}','2019'))
+                write_header.close()
+
+        # стандартная процедура записи статистики после запуска скрипта
         with open(self.statics_unreg_file, 'a') as statics:
             statics.write("\n<tr><td>{0}</td>".format( self.f_str_date))
             statics.write("<td>{0}</td>".format( self.f_str_time))
