@@ -1,9 +1,3 @@
-<!--
-Пример названия файла, это подробный отчет
-который создается после каждого запуска скрипта.
-После формирования нового отчета добавляется в папку delail_stat
-новый подробный отчет.
--->
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,4 +32,3 @@
 	</tr>
 </thead>
 <tbody>
-<tr ><td>1</td><td>BF99F800006F0D00</td><td>45</td><td ><input type="checkbox" id="hd-1" class="hide"/><label for="hd-1" >список</label><div> {list_dev} </div></td></tr>

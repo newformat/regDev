@@ -217,6 +217,10 @@ class DataAnalysis:
 
 
     def file_write_detail_statics(self):
+        # шаблон для записи в файл с таблицей (запись ведется всегда в новый файл)
+        # внимание! параметр в шаблоне id="hd-1" нужно менять в каждом новом поле таблицы - hd-1 ... hd-2 ... hd-3 ... и т.д.
+        # внимание! такая же ситуация в параметре с шаблоном for="hd-1". - иначе информация останется в первом поле и с других полей будет открываться блок первого поля
+        # <tr ><td>1</td><td>(АДРЕС_СЕТИ)</td><td>(КОЛ-ВО ПУ)</td><td ><input type="checkbox" id="hd-1" class="hide"/><label for="hd-1" >список</label><div> {СПИСОК ПУ} </div></td></tr>
         '''
         Подробная статистика по спику файла *.csv
         1. Создать шаблон страницы
@@ -245,6 +249,12 @@ class DataAnalysis:
             # создание нового файла и запись шапки
             with open(self.statics_unreg_file, 'w') as write_header:
                 write_header.write(head_htm.replace('{MONTH}','00').replace('{YEAR}','2019'))
+                write_header.close()
+        # проверка числа, для создания пробела в поле таблицы
+        elif str(datetime.today().date())[-2:] != self.get_data_file(self.statics_unreg_file)[-2:]:
+            template_gap = "<tr style=\"background-color: #ffe2c0\"><td></td><td></td><td></td><td></td><td></td></tr>"
+            with open(self.statics_unreg_file, 'w') as write_header:
+                write_header.write(template_gap)
                 write_header.close()
 
         # стандартная процедура записи статистики после запуска скрипта
