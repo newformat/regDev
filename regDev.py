@@ -212,23 +212,40 @@ class DataAnalysis:
                 return template.read()
 
     def get_data_file(self, path_file):
-        ''' возвращает дату последнего изменения '''
+        ''' возвращает дату последнего изменения файла'''
         return str(datetime.fromtimestamp(os.stat(path_file).st_mtime).date())
 
 
     def file_write_detail_statics(self):
-        # шаблон для записи в файл с таблицей (запись ведется всегда в новый файл)
-        # внимание! параметр в шаблоне id="hd-1" нужно менять в каждом новом поле таблицы - hd-1 ... hd-2 ... hd-3 ... и т.д.
-        # внимание! такая же ситуация в параметре с шаблоном for="hd-1". - иначе информация останется в первом поле и с других полей будет открываться блок первого поля
-        # <tr ><td>1</td><td>(АДРЕС_СЕТИ)</td><td>(КОЛ-ВО ПУ)</td><td ><input type="checkbox" id="hd-1" class="hide"/><label for="hd-1" >список</label><div> {СПИСОК ПУ} </div></td></tr>
         '''
-        Подробная статистика по спику файла *.csv
-        1. Создать шаблон страницы
-        2. Собрать данные для записи
-        3. Записать данные в шаблон страницы
-        4. Сохранить шаблон с данными в файл в папку detail_stat
-        :return:
+            Подробная статистика по спику файла *.csv
+            1. Создать шаблон страницы
+            2. Собрать данные для записи
+            3. Записать данные в шаблон страницы
+            4. Сохранить шаблон с данными в файл в папку detail_stat
+            :return:
         '''
+        # шаблон шапки + часть таблицы с добавлением даты и времени - head_htm_detail
+        head_htm_detail = self.get_template(".\\templates\\html\\head_detail_stat.txt").replace('{data}', self.f_str_date).replace('{time}', self.f_str_time )
+        footer_htm_detail = self.get_template(".\\templates\\html\\footer_detail_stat.txt")
+
+        # запись данных в файл
+        path_file_stat = f".\\monitoring\\detail_stat\\{self.f_str_date}_{self.f_str_time.replace(':','-')}.htm"
+
+        with open(path_file_stat, 'w') as detail_stat_file:
+            detail_stat_file.write(head_htm_detail)
+            id = 1 # счетчик для нумерации и выпадающего списка
+            # список ключей (сетей)
+            for network in self.network_devices:
+                detail_stat_file.write(f"<tr><td>{id}</td><td>{network}</td><td>{len(self.network_devices[network])}</td><td ><input type=\"checkbox\" id=\"hd-{id}\" class=\"hide\"/><label for=\"hd-{id}\" >список</label><div>\n")
+                for dev in self.network_devices[network]:
+                    detail_stat_file.write(f"{dev}\n")
+                detail_stat_file.write(f"</div></td></tr>\n")
+                id += 1
+            detail_stat_file.write(footer_htm_detail)
+            detail_stat_file.close()
+        return path_file_stat
+
 
     # ВНИМАНИЕ! ДАННЫЙ МЕТОД НУЖНО БУДЕТ РАЗДЕЛИТЬ НА ДРУГИЕ МЕТОДЫ
     def file_write_statics(self):
@@ -257,11 +274,14 @@ class DataAnalysis:
                 write_header.write(template_gap)
                 write_header.close()
 
+        # статистика в деталях
+        detail_path_stat = self.file_write_detail_statics()
+
         # стандартная процедура записи статистики после запуска скрипта
         with open(self.statics_unreg_file, 'a') as statics:
             statics.write("\n<tr><td>{0}</td>".format( self.f_str_date))
             statics.write("<td>{0}</td>".format( self.f_str_time))
             statics.write("<td>{0}</td>".format( str(len(self.networks))))
             statics.write("<td>{0}</td>".format( self.count_devices))
-            statics.write("<td><a href=\"#\">link</a></td></tr>")
+            statics.write(f"<td><a href=\"{detail_path_stat}\">link</a></td></tr>")
             statics.close()
