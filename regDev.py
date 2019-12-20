@@ -9,15 +9,14 @@ import csv
 import os
 import getpass
 import re
-import time
 from datetime import datetime
 import shutil
 
 class SearchCSVFile:
     ''' поиск файла '''
-    def __init__(self, search_path, tepl_name):
-        self.search_path = search_path  # путь к папке, где хранится csv файл.
-        self.tepl_name = tepl_name  # шаблон названия файла
+    def __init__(self, paths):
+        self.search_path = paths['search_path']  # путь к папке, где хранится csv файл.
+        self.tepl_name = paths['tepl_name']  # шаблон названия файла
 
     def search_new_file(self):
         ''' находит самый "свежий" файл в каталоге и возвращет его полный путь. '''
@@ -69,14 +68,13 @@ class DataWriteForLists:
 
 class DataWriteForFile:
     ''' запись данных в файл .zrx '''
-    def __init__(self, list_unregDevice):
+    def __init__(self, list_unregDevice, paths):
         self.list_unregDevice = list_unregDevice
         self.list_reg_dev = list()
         self.list_leave_dev = list()
         self.save_file_zrx = ''
-        self.template_head = ".\\templates\\rexx\\header.txt"
-        self.template_footer = ".\\templates\\rexx\\footer.txt"
-
+        self.template_head = paths['template_head']
+        self.template_footer = paths['template_footer']
 
     def formation_template_reg_dev(self):
         ''' формирование шаблона под команду registryDevices '''
@@ -158,15 +156,18 @@ class DataWriteForFile:
 
 
 class DataAnalysis:
-    def __init__(self, path_file_csv, list_unregDevice):
+    def __init__(self, path_file_csv, list_unregDevice, paths):
         ''' Дата и время создания файла (коректный формат) '''
         ''' пути к файлам '''
         self.stat = os.stat(path_file_csv)  # путь к файлу (для даты)
-        self.statics_unreg_file = r".\monitoring\statistics.htm"  # путь к статистике файла
-        self.template_d_head = ".\\templates\\html\\head_detail_stat.txt"
-        self.template_d_footer = ".\\templates\\html\\footer_detail_stat.txt"
-        self.template_head_htm = ".\\templates\\html\\head_statics.txt"
-        self.template_footer_htm = ".\\templates\\html\\footer_statics.txt"
+        self.statics_unreg_file = paths['statics_unreg_file']
+        self.template_d_head = paths['template_d_head']
+        self.template_d_footer = paths['template_d_footer']
+        self.template_head_htm = paths['template_head_htm']
+        self.template_footer_htm = paths['template_footer_htm']
+        self.path_detail = paths['path_detail']
+        self.m_history = paths['m_history']
+        ''' дата и время файла csv файла '''
         self.f_str_date = str(datetime.fromtimestamp(self.stat.st_atime).date())
         self.f_str_time = str(datetime.fromtimestamp(self.stat.st_atime).time()).split(".")[0]
         ''' данные - списки и словарь'''
@@ -302,3 +303,32 @@ class DataAnalysis:
             statics.write(f"<td>{self.count_devices}</td>")
             statics.write(f"<td><a href=\"{detail_path_stat}\">link</a></td></tr>")
             statics.close()
+
+
+''' список путей для настройки скрипта '''
+list_of_paths = {
+    'search_csv_file':
+        {
+            "search_path" : "C:\\Users\\" + getpass.getuser() + "\Downloads\\",
+            "tepl_name"   : "attach-unregistered-device-events"
+        },
+
+    'data_write_for_file':
+        {
+            "save_file_zrx"     : "C:\\Users\\" + getpass.getuser() + "\\Desktop\\Основная информация\\REXX\\",
+            "save_file_name"    : "registryDevice.zrx",
+            "template_head"     : ".\\templates\\rexx\\header.txt",
+            "template_footer"   : ".\\templates\\rexx\\footer.txt"
+        },
+
+    'data_analysis':
+        {
+            'template_d_head'     : ".\\templates\\html\\head_detail_stat.txt",
+            "template_d_footer"   : ".\\templates\\html\\footer_detail_stat.txt",
+            "template_head_htm"   : ".\\templates\\html\\head_statics.txt",
+            "template_footer_htm" : ".\\templates\\html\\footer_statics.txt",
+            "statics_unreg_file"  : ".\\monitoring\\statistics.htm",
+            "path_detail"         : ".\\monitoring\\detail_stat\\",
+            "m_history"           : ".\\monitoring\\history\\"
+        }
+}
