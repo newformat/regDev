@@ -92,8 +92,8 @@ class DataWriteForFile:
         zoc_line = "\";CALL ZocSend \"^M\";Call ZocTimeout 8;CALL Zocwait \">\";CALL ZocSend \"^C\";delay 1;"
         mac_list = list()
 
-        if os.path.exists(mac_networks):
-            with open(mac_networks, "r") as mac_addr:
+        if os.path.exists(self.mac_networks):
+            with open(self.mac_networks, "r") as mac_addr:
                 for mac in mac_addr:
                     mac_list.append(mac.split('\n')[0])
         else:
