@@ -14,12 +14,10 @@ from datetime import datetime
 import shutil
 
 class SearchCSVFile:
-
+    ''' поиск файла '''
     def __init__(self, search_path, tepl_name):
         self.search_path = search_path  # путь к папке, где хранится csv файл.
         self.tepl_name = tepl_name  # шаблон названия файла
-
-    # TODO: == реализовать отдельный метод провеки пути к файлу здесь ==
 
     def search_new_file(self):
         ''' находит самый "свежий" файл в каталоге и возвращет его полный путь. '''
@@ -41,13 +39,7 @@ class SearchCSVFile:
 
 
 class DataWriteForLists:
-    '''
-     Работа с файлом - запись данных в списки
-      TODO:27.11.19 - идея, после переофрмления кода в ООП перевести списки в словарь, так будет лучше, пример:
-          list_regDevice =  {'МАС адреса сетей':[...список МАС сетей...], 'МАС адреса устройств':[... список МАС устройств...]
-          29.11.19 - дополнение к идеи, формировать список структурно - 1 сеть - его мак адреса, другая сеть - другие мак адреса
-    '''
-
+    ''' Работа с файлом - запись данных в списки '''
     def __init__(self, search_new_file):
         self.path_file_csv = search_new_file  # путь к новому csv файлу для работы
         self.list_regDevice = list()
@@ -81,7 +73,9 @@ class DataWriteForFile:
         self.list_unregDevice = list_unregDevice
         self.list_reg_dev = list()
         self.list_leave_dev = list()
-        self.save_file = '' # путь для сохранения файла rzx
+        self.save_file_zrx = ''
+        self.template_head = ".\\templates\\rexx\\header.txt"
+        self.template_footer = ".\\templates\\rexx\\footer.txt"
 
 
     def formation_template_reg_dev(self):
@@ -100,9 +94,12 @@ class DataWriteForFile:
         mac_networks = ".\\data\\mac_net_big_project.txt"
         mac_list = list()
 
-        with open(mac_networks, "r") as mac_addr:
-            for mac in mac_addr:
-                mac_list.append(mac.split('\n')[0])
+        if os.path.exists(mac_networks):
+            with open(mac_networks, "r") as mac_addr:
+                for mac in mac_addr:
+                    mac_list.append(mac.split('\n')[0])
+        else:
+            input('Warning: mac_net_big_project.txt не найден...')
 
         for leave_dev in self.list_unregDevice:
             if leave_dev[37:53] in mac_list:
@@ -117,7 +114,7 @@ class DataWriteForFile:
         :param name_file_zrx - название файла
         """
         if os.path.exists(save_path):
-            self.save_file = save_path + name_file_zrx
+            self.save_file_zrx = save_path + name_file_zrx  # путь сохранения файла + имя_файла.zrx
         else:
             self.print_folder_not_found()
             return -1
@@ -131,22 +128,15 @@ class DataWriteForFile:
 
     def file_write(self):
         ''' запись шаблона в файл '''
-        template_head = ".\\templates\\header.txt"
-        template_footer = ".\\templates\\footer.txt"
-
         try:
-
-            with open(self.save_file, 'w') as result:
+            with open(self.save_file_zrx, 'w') as result:
                 ''' шапка скрипта '''
-                result.write(self.get_template(template_head))
-
+                result.write(self.get_template(self.template_head))
                 for count in range(0, len(self.list_reg_dev) - 1):
                     result.write(self.list_reg_dev[count] + '\n')
                     result.write(self.list_leave_dev[count] + '\n')
-
-                result.write(self.get_template(template_footer))
+                result.write(self.get_template(self.template_footer))
                 result.close()
-
         except FileNotFoundError:
             self.print_file_not_found_error()
             return -1
@@ -168,30 +158,38 @@ class DataWriteForFile:
 
 
 class DataAnalysis:
-    # TODO: идея: для того, чтобы определить, настал ли новый месяц - стоит проверить дату последнего изменения файла с текущей
-    #   Это нужно для создания нового файла когда настанет новый месяц для записи отчетов
-    #
-    # TODO: дополнить пробелом в таблице между днями в полях для удобства
     def __init__(self, path_file_csv, list_unregDevice):
         ''' Дата и время создания файла (коректный формат) '''
+        ''' пути к файлам '''
         self.stat = os.stat(path_file_csv)  # путь к файлу (для даты)
         self.statics_unreg_file = r".\monitoring\statistics.htm"  # путь к статистике файла
+        self.template_d_head = ".\\templates\\html\\head_detail_stat.txt"
+        self.template_d_footer = ".\\templates\\html\\footer_detail_stat.txt"
+        self.template_head_htm = ".\\templates\\html\\head_statics.txt"
+        self.template_footer_htm = ".\\templates\\html\\footer_statics.txt"
         self.f_str_date = str(datetime.fromtimestamp(self.stat.st_atime).date())
         self.f_str_time = str(datetime.fromtimestamp(self.stat.st_atime).time()).split(".")[0]
+        ''' данные - списки и словарь'''
         self.list_unregDevice = list_unregDevice
         self.count_devices = str(len(list_unregDevice))  # кол-во МАС адресов из списка
         self.networks = list() # кол-во МАС адресов сетей и значения
         self.network_devices = dict() # словарь, 'сеть' : [..устройства..]
 
-    # кол-во сетей на незарегистрированные ПУ
+    def print_error(self, method_name, error_text):
+        ''' выход из программы при наличии ошибки '''
+        print(f'\nDataAnalysis: method - {method_name}')
+        exit(input(f"{error_text}\nclick Enter to exit..."))
+
+
     def get_networks_count(self):
+        ''' кол-во сетей на незарегистрированные ПУ '''
         for network in self.list_unregDevice:
             if network[37:53] not in self.networks:
                 self.networks.append(network[37:53])
 
-    #  кол-во устройств на каждую сеть
+
     def get_network_devices(self):
-        '''
+        ''' кол-во устройств на каждую сеть
         self.networks - cписок сетей
         self.list_unregDevice - список из *.csv файла
         self.network_devices -  словарь, формат ( сеть - [..устройства этой сети..] )
@@ -207,18 +205,22 @@ class DataAnalysis:
 
 
     def get_template(self, path_template ):
+        ''' получить шаблон из файла '''
         if (os.path.exists(path_template)):
             with open(path_template, 'r') as template:
                 return template.read()
+        self.print_error("get_template", f"ошибка пути - {path_template}")
+
 
     def get_data_file(self, path_file):
         ''' возвращает дату последнего изменения файла'''
-        return str(datetime.fromtimestamp(os.stat(path_file).st_mtime).date())
+        if (os.path.exists(path_file)):
+            return str(datetime.fromtimestamp(os.stat(path_file).st_mtime).date())
+        self.print_error("get_data_file", f"ошибка пути - '{path_file}'")
 
 
     def file_write_detail_statics(self):
-        '''
-            Подробная статистика по спику файла *.csv
+        ''' подробная статистика по спику файла *.csv
             1. Создать шаблон страницы
             2. Собрать данные для записи
             3. Записать данные в шаблон страницы
@@ -226,47 +228,62 @@ class DataAnalysis:
             :return:
         '''
         # шаблон шапки + часть таблицы с добавлением даты и времени - head_htm_detail
-        head_htm_detail = self.get_template(".\\templates\\html\\head_detail_stat.txt").replace('{data}', self.f_str_date).replace('{time}', self.f_str_time )
-        footer_htm_detail = self.get_template(".\\templates\\html\\footer_detail_stat.txt")
-
-        # запись данных в файл
+        head_htm_detail = self.get_template(self.template_d_head)\
+            .replace('{data}', self.f_str_date).replace('{time}', self.f_str_time )
+        footer_htm_detail = self.get_template(self.template_d_footer)
+        # путь записи данных в файл
         path_file_stat = f".\\monitoring\\detail_stat\\{self.f_str_date}_{self.f_str_time.replace(':','-')}.htm"
 
         with open(path_file_stat, 'w') as detail_stat_file:
             detail_stat_file.write(head_htm_detail)
-            id = 1 # счетчик для нумерации и выпадающего списка
+            id = 1
             # список ключей (сетей)
             for network in self.network_devices:
-                detail_stat_file.write(f"<tr><td>{id}</td><td>{network}</td><td>{len(self.network_devices[network])}</td><td ><input type=\"checkbox\" id=\"hd-{id}\" class=\"hide\"/><label for=\"hd-{id}\" >список</label><div>\n")
+                detail_stat_file.write(f"<tr><td>{id}</td><td>{network}</td><td>{len(self.network_devices[network])}</td>"
+                                       f"<td ><input type=\"checkbox\" id=\"hd-{id}\" class=\"hide\"/>"
+                                       f"<label for=\"hd-{id}\" >список</label><div>\n")
                 for dev in self.network_devices[network]:
                     detail_stat_file.write(f"{dev}\n")
                 detail_stat_file.write(f"</div></td></tr>\n")
                 id += 1
             detail_stat_file.write(footer_htm_detail)
             detail_stat_file.close()
-        return path_file_stat
+        # проверка пути
+        if os.path.exists(path_file_stat) == False:
+            self.print_error('file_write_detail_statics', f"ошибка пути - {path_file_stat}")
+
+        return f".{path_file_stat[12:]}"
 
 
-    # ВНИМАНИЕ! ДАННЫЙ МЕТОД НУЖНО БУДЕТ РАЗДЕЛИТЬ НА ДРУГИЕ МЕТОДЫ
     def file_write_statics(self):
         ''' запись статистики в файл [5:7] '''
-        # если месяц не текущий - архивируем старый файл прошлого месяца в ./history и создаем новый
-        if str(datetime.today().date())[5:7] != self.get_data_file(self.statics_unreg_file)[5:7]:
-            head_htm = self.get_template(".\\templates\\html\\head_statics.txt")
-            footer_htm = self.get_template(".\\templates\\html\\footer_statics.txt")
+        month_now = str(datetime.today().date())[5:7]
+        year_now = str(datetime.today().date())[:4]
+        head_htm = self.get_template(self.template_head_htm)
+        footer_htm = self.get_template(self.template_footer_htm)
 
-            # записать футер в файле
+        # если файл не существует - создать новый
+        if os.path.exists(self.statics_unreg_file) == False:
+            with open(self.statics_unreg_file, 'w') as write_header:
+                write_header.write(head_htm.replace('{MONTH}',month_now).replace('{YEAR}', year_now))
+                write_header.close()
+
+        # если новый месяц - архивируем старый файл прошлого месяца в ./history и создаем новый
+        if month_now != self.get_data_file(self.statics_unreg_file)[5:7]:
             with open(self.statics_unreg_file, 'a') as write_footer:
                 write_footer.write(footer_htm)
                 write_footer.close()
 
-            # копирование файла в папку history в формате "дата.htm" (убрать число из даты т.к. функция get_data_file возвращает дату последнего изменения)
-            shutil.move(self.statics_unreg_file, ".\\monitoring\\history\\{0}.htm".format('x.' + self.get_data_file(self.statics_unreg_file)[5:7] + '.' + self.get_data_file(self.statics_unreg_file)[:4]))
+            # перемещение файла в папку history в формате "дата.htm"
+            shutil.move(self.statics_unreg_file, f".\\monitoring\\history\\x."
+                                                 f"{self.get_data_file(self.statics_unreg_file)[5:7]}."
+                                                 f"{self.get_data_file(self.statics_unreg_file)[:4]}.htm")
 
             # создание нового файла и запись шапки
             with open(self.statics_unreg_file, 'w') as write_header:
-                write_header.write(head_htm.replace('{MONTH}','00').replace('{YEAR}','2019'))
+                write_header.write(head_htm.replace('{MONTH}',month_now).replace('{YEAR}', year_now))
                 write_header.close()
+
         # проверка числа, для создания пробела в поле таблицы
         elif str(datetime.today().date())[-2:] != self.get_data_file(self.statics_unreg_file)[-2:]:
             template_gap = "<tr style=\"background-color: #ffe2c0\"><td></td><td></td><td></td><td></td><td></td></tr>"
@@ -277,11 +294,11 @@ class DataAnalysis:
         # статистика в деталях
         detail_path_stat = self.file_write_detail_statics()
 
-        # стандартная процедура записи статистики после запуска скрипта
+        # стандартная процедура записи статистики работы скрипта
         with open(self.statics_unreg_file, 'a') as statics:
-            statics.write("\n<tr><td>{0}</td>".format( self.f_str_date))
-            statics.write("<td>{0}</td>".format( self.f_str_time))
-            statics.write("<td>{0}</td>".format( str(len(self.networks))))
-            statics.write("<td>{0}</td>".format( self.count_devices))
+            statics.write(f"\n<tr><td>{self.f_str_date}</td>")
+            statics.write(f"<td>{self.f_str_time}</td>")
+            statics.write(f"<td>{len(self.networks)}</td>")
+            statics.write(f"<td>{self.count_devices}</td>")
             statics.write(f"<td><a href=\"{detail_path_stat}\">link</a></td></tr>")
             statics.close()
