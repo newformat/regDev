@@ -75,6 +75,7 @@ class DataWriteForFile:
         self.save_file_zrx = ''
         self.template_head = paths['template_head']
         self.template_footer = paths['template_footer']
+        self.mac_networks = paths['mac_networks']
 
     def formation_template_reg_dev(self):
         ''' формирование шаблона под команду registryDevices '''
@@ -89,7 +90,6 @@ class DataWriteForFile:
         zoc_leave_time = " 250"
         zoc_leave_time_big = " 720"
         zoc_line = "\";CALL ZocSend \"^M\";Call ZocTimeout 8;CALL Zocwait \">\";CALL ZocSend \"^C\";delay 1;"
-        mac_networks = ".\\data\\mac_net_big_project.txt"
         mac_list = list()
 
         if os.path.exists(mac_networks):
@@ -233,7 +233,7 @@ class DataAnalysis:
             .replace('{data}', self.f_str_date).replace('{time}', self.f_str_time )
         footer_htm_detail = self.get_template(self.template_d_footer)
         # путь записи данных в файл
-        path_file_stat = f".\\monitoring\\detail_stat\\{self.f_str_date}_{self.f_str_time.replace(':','-')}.htm"
+        path_file_stat = f"{self.path_detail}{self.f_str_date}_{self.f_str_time.replace(':','-')}.htm"
 
         with open(path_file_stat, 'w') as detail_stat_file:
             detail_stat_file.write(head_htm_detail)
@@ -276,7 +276,7 @@ class DataAnalysis:
                 write_footer.close()
 
             # перемещение файла в папку history в формате "дата.htm"
-            shutil.move(self.statics_unreg_file, f".\\monitoring\\history\\x."
+            shutil.move(self.statics_unreg_file, f"{self.m_history}x."
                                                  f"{self.get_data_file(self.statics_unreg_file)[5:7]}."
                                                  f"{self.get_data_file(self.statics_unreg_file)[:4]}.htm")
 
@@ -318,7 +318,8 @@ list_of_paths = {
             "save_file_zrx"     : "C:\\Users\\" + getpass.getuser() + "\\Desktop\\Основная информация\\REXX\\",
             "save_file_name"    : "registryDevice.zrx",
             "template_head"     : ".\\templates\\rexx\\header.txt",
-            "template_footer"   : ".\\templates\\rexx\\footer.txt"
+            "template_footer"   : ".\\templates\\rexx\\footer.txt",
+            "mac_networks"      : ".\\data\\mac_net_big_project.txt"
         },
 
     'data_analysis':
