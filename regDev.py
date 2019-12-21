@@ -31,7 +31,10 @@ class SearchCSVFile:
             input('Нажмите enter чтобы продолжить')
             return -1
         else:
-            return max(list_paths, key=os.path.getctime)
+            new_file = list_paths.pop(list_paths.index(max(list_paths, key=os.path.getctime)))
+            for del_file in list_paths:
+                os.remove(del_file)
+            return new_file
 
     def print_not_file(self):
         print("файла с названием " + self.tepl_name + " не найден")
